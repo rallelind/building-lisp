@@ -31,9 +31,9 @@ enum { LVAL_NUM, LVAL_ERR };
 
 enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 
-typedef struct {
+typedef union {
     int type;
-    long num;
+    double num;
     int err;
 } lval;
 
@@ -53,7 +53,7 @@ lval lval_err(int x) {
 
 void lval_print(lval v) {
     switch (v.type) {
-        case LVAL_NUM: printf("%li", v.num); break;
+        case LVAL_NUM: printf("%.2f", v.num); break;
         case LVAL_ERR: 
             if (v.err == LERR_DIV_ZERO) {
                 printf("Error: Division by Zero!");
@@ -83,7 +83,7 @@ lval eval_op(lval x, char* op, lval y) {
     if (strcmp(op, "/") == 0) { 
         return y.num == 0 ? lval_err(LERR_DIV_ZERO) : lval_num(x.num / y.num);
     }
-    if (strcmp(op, "%") == 0) { return lval_num(x.num % y.num); }
+    if (strcmp(op, "%") == 0) { return lval_num(fmod(x.num, y.num)); }
     if (strcmp(op, "^") == 0) { return lval_num(pow(x.num, y.num)); }
     
     return lval_err(LERR_BAD_OP);
